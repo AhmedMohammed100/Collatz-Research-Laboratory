@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Collatz Research Laboratory</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #17202a;
+}
+
+header {
+    background: #17202a;
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 10px;
+}
+
+header p {
+    max-width: 850px;
+    margin: auto;
+    line-height: 1.6;
+}
+
+main {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+h2 {
+    margin-top: 0;
+}
+
+h3 {
+    margin-bottom: 8px;
+}
+
+input,
+select,
+button,
+textarea {
+    font: inherit;
+}
+
+input,
+select {
+    padding: 10px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+}
+
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #17202a;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.stat {
+    background: #eef1f4;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.stat-label {
+    font-size: 13px;
+    color: #667;
+}
+
+.stat-value {
+    font-size: 21px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.success {
+    color: #16753b;
+}
+
+.warning {
+    color: #a45a00;
+}
+
+.danger {
+    color: #a00000;
+}
+
+.info {
+    color: #245b9c;
+}
+
+canvas {
+    width: 100%;
+    height: 400px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
+    background: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th,
+td {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #eef1f4;
+}
+
+.scroll {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.progress-container {
+    margin-top: 15px;
+    background: #ddd;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #17202a;
+    transition: width 0.1s;
+}
+
+pre {
+    background: #17202a;
+    color: #eee;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}
+
+textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 12px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #eef1f4;
+    margin: 3px;
+    font-size: 13px;
+}
+
+.small {
+    font-size: 13px;
+    color: #667;
+}
+
+.section-number {
+    display: inline-block;
+    background: #17202a;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    text-align: center;
+    line-height: 28px;
+    margin-right: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Collatz Research Laboratory</h1>
+
+    <p>
+        An experimental environment for searching for patterns,
+        invariants, statistical regularities and possible lemmas
+        related to the Collatz conjecture.
+    </p>
+</header>
+
+<main>
+
+<!-- ========================================================= -->
+<!-- STAGE 1 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">1</span>
+Single Number Explorer
+</h2>
+
+<p>
+Explore the complete trajectory of an individual integer.
+</p>
+
+<div class="controls">
+
+<input
+    id="singleInput"
+    value="27"
+    placeholder="Starting integer"
+>
+
+<button onclick="analyzeSingle()">
+    Analyze
+</button>
+
+</div>
+
+<div class="grid" style="margin-top:20px">
+
+<div class="stat">
+<div class="stat-label">Starting value</div>
+<div id="singleStart" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Stopping time</div>
+<div id="singleSteps" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Maximum value</div>
+<div id="singleMax" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Odd steps</div>
+<div id="singleOdd" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Even steps</div>
+<div id="singleEven" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Status</div>
+<div id="singleStatus" class="stat-value">—</div>
+</div>
+
+</div>
+
+<div id="singleSequence" class="scroll" style="margin-top:20px"></div>
+
+<canvas id="trajectoryCanvas"></canvas>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 2 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">2</span>
+Range Tester
+</h2>
+
+<p>
+Test every integer from 1 through a selected upper limit.
+</p>
+
+<div class="controls">
+
+<label>
+Maximum:
+<input id="rangeMax" type="number" value="100000" min="1">
+</label>
+
+<button id="rangeButton" onclick="runRangeTest()">
+Run range test
+</button>
+
+<button onclick="stopRangeTest()">
+Stop
+</button>
+
+</div>
+
+<div class="progress-container">
+<div id="rangeProgress" class="progress-bar"></div>
+</div>
+
+<p id="rangeStatus" class="small">
+Waiting.
+</p>
+
+<div class="grid">
+
+<div class="stat">
+<div class="stat-label">Numbers tested</div>
+<div id="testedCount" class="stat-value">0</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Longest stopping time</div>
+<div id="recordSteps" class="stat-value">0</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Record holder</div>
+<div id="recordNumber" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Largest excursion</div>
+<div id="rangeMaxValue" class="stat-value">0</div>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 3 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">3</span>
+Record Holders
+</h2>
+
+<p>
+Numbers that establish new records for stopping time or maximum excursion.
+</p>
+
+<div class="scroll">
+
+<table>
+
+<thead>
+<tr>
+<th>Number</th>
+<th>Stopping time</th>
+<th>Maximum reached</th>
+<th>Maximum / starting value</th>
+</tr>
+</thead>
+
+<tbody id="recordsTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 4 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">4</span>
+Cycle Detector
+</h2>
+
+<p>
+The conjecture predicts that every positive integer eventually
+enters the known cycle:
+</p>
+
+<p>
+<strong>4 → 2 → 1 → 4 → ...</strong>
+</p>
+
+<p>
+This detector looks for cycles encountered during computation.
+</p>
+
+<div id="cycleResults">
+No range has been tested yet.
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 5 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">5</span>
+Odd/Even Structure Analyzer
+</h2>
+
+<p>
+The ordinary Collatz map can hide useful structure. This section
+examines runs of odd and even operations.
+</p>
+
+<div class="controls">
+
+<input
+    id="patternInput"
+    value="27"
+    placeholder="Number"
+>
+
+<button onclick="analyzePattern()">
+Analyze structure
+</button>
+
+</div>
+
+<div class="grid" style="margin-top:20px">
+
+<div class="stat">
+<div class="stat-label">Odd operations</div>
+<div id="patternOdd" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Even operations</div>
+<div id="patternEven" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Longest even run</div>
+<div id="longEven" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Longest odd run</div>
+<div id="longOdd" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Odd percentage</div>
+<div id="oddPercentage" class="stat-value">—</div>
+</div>
+
+<div class="stat">
+<div class="stat-label">Average log change</div>
+<div id="averageLogChange" class="stat-value">—</div>
+</div>
+
+</div>
+
+<h3>Parity pattern</h3>
+
+<div id="parityPattern"></div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 6 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">6</span>
+Statistical Pattern Search
+</h2>
+
+<p>
+This section asks whether the data suggests systematic relationships
+between starting values, stopping times and excursions.
+</p>
+
+<button onclick="runPatternSearch()">
+Search for patterns
+</button>
+
+<div id="patternResults" style="margin-top:20px">
+
+Run a range test first.
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- STAGE 7 -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+<span class="section-number">7</span>
+Candidate Lemma Generator
+</h2>
+
+<p>
+A computation cannot prove the Collatz conjecture. However, if repeated
+experiments reveal a strong pattern, we can formulate a mathematical
+statement and attempt to prove it.
+</p>
+
+<div id="lemmaResults">
+
+Run the pattern search first.
+
+</div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- RESEARCH NOTES -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>
+Research Notebook
+</h2>
+
+<p>
+Write down observations that appear mathematically interesting.
+</p>
+
+<textarea
+id="researchNotes"
+placeholder="Example:
+
+Observation:
+Numbers with this parity structure seem to...
+
+Possible lemma:
+For every n satisfying...
+
+Evidence:
+Tested through...
+
+Potential proof strategy:
+..."
+></textarea>
+
+<button onclick="saveNotes()" style="margin-top:10px">
+Save notes
+</button>
+
+<button onclick="clearNotes()" style="margin-top:10px">
+Clear notes
+</button>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- DISCLAIMER -->
+<!-- ========================================================= -->
+
+<div class="card">
+
+<h2>What would count as progress?</h2>
+
+<p>
+Finding that millions or billions of numbers reach 1 is evidence,
+but it is not a proof.
+</p>
+
+<p>
+The interesting goal is to discover a statement such as:
+</p>
+
+<pre>
+For every positive integer n,
+some explicitly defined transformation T(n)
+produces a smaller positive integer.
+</pre>
+
+<p>
+If such a statement could be proved for all integers, it could
+potentially reduce the Collatz problem to a well-founded descent.
+</p>
+
+</div>
+
+</main>
+
+
+<script>
+
+/* ============================================================
+   GLOBAL STATE
+   ============================================================ */
+
+let rangeResults = [];
+let recordHolders = [];
+let rangeRunning = false;
+let stopRequested = false;
+
+
+/* ============================================================
+   BIGINT UTILITIES
+   ============================================================ */
+
+function toBigInt(value) {
+
+    value = String(value).trim();
+
+    if (!/^[0-9]+$/.test(value)) {
+        throw new Error("Enter a positive integer.");
+    }
+
+    const n = BigInt(value);
+
+    if (n < 1n) {
+        throw new Error("Number must be positive.");
+    }
+
+    return n;
+}
+
+
+function formatBigInt(n) {
+    return n.toLocaleString();
+}
+
+
+/* ============================================================
+   COLLATZ
+   ============================================================ */
+
+function collatzBigInt(start, maxSteps = 1000000) {
+
+    let n = start;
+
+    const sequence = [n];
+
+    const seen = new Set();
+
+    seen.add(n.toString());
+
+    while (n !== 1n) {
+
+        if (sequence.length > maxSteps) {
+            return {
+                sequence,
+                reachedOne: false,
+                cycle: true
+            };
+        }
+
+        if (n % 2n === 0n) {
+            n = n / 2n;
+        } else {
+            n = 3n * n + 1n;
+        }
+
+        const key = n.toString();
+
+        if (seen.has(key) && n !== 1n) {
+
+            sequence.push(n);
+
+            return {
+                sequence,
+                reachedOne: false,
+                cycle: true
+            };
+        }
+
+        seen.add(key);
+
+        sequence.push(n);
+    }
+
+    return {
+        sequence,
+        reachedOne: true,
+        cycle: false
+    };
+}
+
+
+/* ============================================================
+   TRAJECTORY STATISTICS
+   ============================================================ */
+
+function calculateStats(sequence) {
+
+    let maximum = sequence[0];
+
+    let odd = 0;
+    let even = 0;
+
+    let currentEvenRun = 0;
+    let currentOddRun = 0;
+
+    let longestEvenRun = 0;
+    let longestOddRun = 0;
+
+    let logChanges = [];
+
+    for (let i = 0; i < sequence.length; i++) {
+
+        const n = sequence[i];
+
+        if (n > maximum) {
+            maximum = n;
+        }
+
+        if (i === 0) continue;
+
+        if (n % 2n === 0n) {
+
+            even++;
+
+            currentEvenRun++;
+            currentOddRun = 0;
+
+            longestEvenRun =
+                Math.max(longestEvenRun, currentEvenRun);
+
+        } else {
+
+            odd++;
+
+            currentOddRun++;
+            currentEvenRun = 0;
+
+            longestOddRun =
+                Math.max(longestOddRun, currentOddRun);
+        }
+
+        const previous = Number(sequence[i - 1]);
+        const current = Number(n);
+
+        if (
+            Number.isFinite(previous) &&
+            Number.isFinite(current) &&
+            previous > 0 &&
+            current > 0
+        ) {
+
+            logChanges.push(
+                Math.log(current / previous)
+            );
+        }
+    }
+
+    const averageLogChange =
+        logChanges.length
+            ? logChanges.reduce((a,b) => a+b,0) /
+              logChanges.length
+            : 0;
+
+    return {
+        steps: sequence.length - 1,
+        maximum,
+        odd,
+        even,
+        longestEvenRun,
+        longestOddRun,
+        oddPercentage:
+            sequence.length > 1
+                ? odd / (sequence.length - 1) * 100
+                : 0,
+        averageLogChange
+    };
+}
+
+
+/* ============================================================
+   STAGE 1
+   ============================================================ */
+
+function analyzeSingle() {
+
+    try {
+
+        const start =
+            toBigInt(document.getElementById("singleInput").value);
+
+        const result =
+            collatzBigInt(start);
+
+        const stats =
+            calculateStats(result.sequence);
+
+        document.getElementById("singleStart")
+            .textContent = formatBigInt(start);
+
+        document.getElementById("singleSteps")
+            .textContent = stats.steps.toLocaleString();
+
+        document.getElementById("singleMax")
+            .textContent = formatBigInt(stats.maximum);
+
+        document.getElementById("singleOdd")
+            .textContent = stats.odd.toLocaleString();
+
+        document.getElementById("singleEven")
+            .textContent = stats.even.toLocaleString();
+
+        document.getElementById("singleStatus")
+            .innerHTML =
+            result.reachedOne
+                ? '<span class="success">Reached 1 ✓</span>'
+                : '<span class="danger">Did not reach 1</span>';
+
+        document.getElementById("singleSequence")
+            .textContent =
+            result.sequence
+                .map(formatBigInt)
+                .join(" → ");
+
+        drawTrajectory(result.sequence);
+
+    } catch (error) {
+
+        alert(error.message);
+    }
+}
+
+
+/* ============================================================
+   GRAPH
+   ============================================================ */
+
+function drawTrajectory(sequence) {
+
+    const canvas =
+        document.getElementById("trajectoryCanvas");
+
+    const ctx =
+        canvas.getContext("2d");
+
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width =
+        canvas.clientWidth * ratio;
+
+    canvas.height =
+        canvas.clientHeight * ratio;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    if (sequence.length < 2) return;
+
+    const padding = 45;
+
+    const logs =
+        sequence.map(n =>
+            Math.log(Number(n))
+        );
+
+    const maxLog =
+        Math.max(...logs);
+
+    const minLog =
+        Math.min(...logs);
+
+    const range =
+        Math.max(maxLog - minLog, 1);
+
+    ctx.beginPath();
+
+    sequence.forEach((n, i) => {
+
+        const x =
+            padding +
+            i /
+            (sequence.length - 1) *
+            (canvas.width - padding * 2);
+
+        const y =
+            canvas.height -
+            padding -
+            (logs[i] - minLog) /
+            range *
+            (canvas.height - padding * 2);
+
+        if (i === 0) {
+            ctx.moveTo(x,y);
+        } else {
+            ctx.lineTo(x,y);
+        }
+    });
+
+    ctx.stroke();
+
+    ctx.font = "14px Arial";
+
+    ctx.fillText(
+        "Trajectory — logarithmic vertical scale",
+        padding,
+        20
+    );
+}
+
+
+/* ============================================================
+   STAGE 2 — RANGE TEST
+   ============================================================ */
+
+async function runRangeTest() {
+
+    if (rangeRunning) return;
+
+    const limit =
+        Number(document.getElementById("rangeMax").value);
+
+    if (!Number.isSafeInteger(limit) || limit < 1) {
+
+        alert(
+            "For the range tester, enter a positive integer up to " +
+            Number.MAX_SAFE_INTEGER.toLocaleString()
+        );
+
+        return;
+    }
+
+    rangeRunning = true;
+    stopRequested = false;
+
+    rangeResults = [];
+    recordHolders = [];
+
+    document.getElementById("recordsTable").innerHTML = "";
+
+    let longestSteps = -1;
+    let longestNumber = null;
+
+    let largestMaximum = 0n;
+
+    let maxRecord = 0n;
+
+    for (let i = 1; i <= limit; i++) {
+
+        if (stopRequested) break;
+
+        const result =
+            collatzBigInt(BigInt(i), 1000000);
+
+        const stats =
+            calculateStats(result.sequence);
+
+        rangeResults.push({
+            number: BigInt(i),
+            steps: stats.steps,
+            maximum: stats.maximum,
+            reachedOne: result.reachedOne
+        });
+
+        if (stats.steps > longestSteps) {
+
+            longestSteps = stats.steps;
+            longestNumber = BigInt(i);
+
+            recordHolders.push({
+                type: "Stopping time",
+                number: BigInt(i),
+                steps: stats.steps,
+                maximum: stats.maximum
+            });
+        }
+
+        if (stats.maximum > largestMaximum) {
+
+            largestMaximum = stats.maximum;
+
+            if (stats.maximum > maxRecord) {
+
+                maxRecord = stats.maximum;
+
+                recordHolders.push({
+                    type: "Maximum excursion",
+                    number: BigInt(i),
+                    steps: stats.steps,
+                    maximum: stats.maximum
+                });
+            }
+        }
+
+        if (
+            i % 100 === 0 ||
+            i === limit
+        ) {
+
+            const progress =
+                i / limit * 100;
+
+            document.getElementById("rangeProgress")
+                .style.width = progress + "%";
+
+            document.getElementById("rangeStatus")
+                .textContent =
+                `Testing ${i.toLocaleString()} of ` +
+                `${limit.toLocaleString()}...`;
+
+            document.getElementById("testedCount")
+                .textContent =
+                i.toLocaleString();
+
+            document.getElementById("recordSteps")
+                .textContent =
+                longestSteps.toLocaleString();
+
+            document.getElementById("recordNumber")
+                .textContent =
+                longestNumber === null
+                    ? "—"
+                    : formatBigInt(longestNumber);
+
+            document.getElementById("rangeMaxValue")
+                .textContent =
+                formatBigInt(largestMaximum);
+
+            /*
+             * Give the browser time to update the UI.
+             */
+            await new Promise(resolve =>
+                setTimeout(resolve, 0)
+            );
+        }
+    }
+
+    rangeRunning = false;
+
+    renderRecords();
+
+    document.getElementById("rangeStatus")
+        .textContent =
+        stopRequested
+            ? "Test stopped."
+            : "Range test completed.";
+
+    analyzeCycles();
+}
+
+
+function stopRangeTest() {
+
+    stopRequested = true;
+}
+
+
+/* ============================================================
+   STAGE 3 — RECORD HOLDERS
+   ============================================================ */
+
+function renderRecords() {
+
+    const table =
+        document.getElementById("recordsTable");
+
+    table.innerHTML = "";
+
+    recordHolders.forEach(record => {
+
+        const row =
+            document.createElement("tr");
+
+        const ratio =
+            Number(record.maximum) /
+            Number(record.number);
+
+        row.innerHTML = `
+            <td>${formatBigInt(record.number)}</td>
+            <td>${record.steps.toLocaleString()}</td>
+            <td>${formatBigInt(record.maximum)}</td>
+            <td>${Number.isFinite(ratio)
+                ? ratio.toFixed(2) + "×"
+                : "very large"}</td>
+        `;
+
+        table.appendChild(row);
+    });
+}
+
+
+/* ============================================================
+   STAGE 4 — CYCLE DETECTION
+   ============================================================ */
+
+function analyzeCycles() {
+
+    if (!rangeResults.length) {
+
+        document.getElementById("cycleResults")
+            .textContent =
+            "No range has been tested yet.";
+
+        return;
+    }
+
+    const suspicious =
+        rangeResults.filter(
+            x => !x.reachedOne
+        );
+
+    if (!suspicious.length) {
+
+        document.getElementById("cycleResults")
+            .innerHTML =
+            `<span class="success">
+                No non-1 cycles were detected in the tested range.
+            </span>`;
+
+    } else {
+
+        document.getElementById("cycleResults")
+            .innerHTML =
+            `<span class="danger">
+                Potential anomalous trajectories detected:
+                ${suspicious.length}
+            </span>`;
+    }
+}
+
+
+/* ============================================================
+   STAGE 5 — PARITY STRUCTURE
+   ============================================================ */
+
+function analyzePattern() {
+
+    try {
+
+        const start =
+            toBigInt(
+                document.getElementById("patternInput").value
+            );
+
+        const result =
+            collatzBigInt(start);
+
+        const stats =
+            calculateStats(result.sequence);
+
+        document.getElementById("patternOdd")
+            .textContent =
+            stats.odd.toLocaleString();
+
+        document.getElementById("patternEven")
+            .textContent =
+            stats.even.toLocaleString();
+
+        document.getElementById("longEven")
+            .textContent =
+            stats.longestEvenRun;
+
+        document.getElementById("longOdd")
+            .textContent =
+            stats.longestOddRun;
+
+        document.getElementById("oddPercentage")
+            .textContent =
+            stats.oddPercentage.toFixed(2) + "%";
+
+        document.getElementById("averageLogChange")
+            .textContent =
+            stats.averageLogChange.toFixed(5);
+
+        const pattern =
+            result.sequence
+                .slice(0,-1)
+                .map(n =>
+                    n % 2n === 0n ? "E" : "O"
+                )
+                .join("");
+
+        document.getElementById("parityPattern")
+            .innerHTML = pattern
+                .split("")
+                .map(x =>
+                    `<span class="badge">${x}</span>`
+                )
+                .join("");
+
+    } catch(error) {
+
+        alert(error.message);
+    }
+}
+
+
+/* ============================================================
+   STAGE 6 — PATTERN SEARCH
+   ============================================================ */
+
+function runPatternSearch() {
+
+    if (!rangeResults.length) {
+
+        document.getElementById("patternResults")
+            .innerHTML =
+            '<span class="warning">' +
+            'Run a range test first.' +
+            '</span>';
+
+        return;
+    }
+
+    const count =
+        rangeResults.length;
+
+    const totalSteps =
+        rangeResults.reduce(
+            (sum,x) => sum + x.steps,
+            0
+        );
+
+    const averageSteps =
+        totalSteps / count;
+
+    const longest =
+        rangeResults.reduce(
+            (a,b) =>
+                b.steps > a.steps ? b : a
+        );
+
+    const averageRatio =
+        rangeResults.reduce(
+            (sum,x) =>
+                sum +
+                Number(x.maximum) /
+                Number(x.number),
+            0
+        ) / count;
+
+    /*
+     * Group numbers by residue modulo 4.
+     */
+
+    const residueGroups = {};
+
+    for (const x of rangeResults) {
+
+        const residue =
+            Number(x.number % 4n);
+
+        if (!residueGroups[residue]) {
+            residueGroups[residue] = [];
+        }
+
+        residueGroups[residue].push(x.steps);
+    }
+
+    let residueHTML = "";
+
+    for (const residue of Object.keys(residueGroups)) {
+
+        const values =
+            residueGroups[residue];
+
+        const avg =
+            values.reduce((a,b)=>a+b,0) /
+            values.length;
+
+        residueHTML += `
+            <span class="badge">
+                n ≡ ${residue} mod 4:
+                average steps = ${avg.toFixed(2)}
+            </span>
+        `;
+    }
+
+    /*
+     * Low/high comparison.
+     */
+
+    const low =
+        rangeResults.filter(
+            x => x.number <= BigInt(Math.floor(count / 2))
+        );
+
+    const high =
+        rangeResults.filter(
+            x => x.number > BigInt(Math.floor(count / 2))
+        );
+
+    const lowAverage =
+        low.length
+            ? low.reduce((a,b)=>a+b.steps,0) / low.length
+            : 0;
+
+    const highAverage =
+        high.length
+            ? high.reduce((a,b)=>a+b.steps,0) / high.length
+            : 0;
+
+    document.getElementById("patternResults")
+        .innerHTML = `
+
+        <div class="grid">
+
+            <div class="stat">
+                <div class="stat-label">
+                    Numbers analyzed
+                </div>
+                <div class="stat-value">
+                    ${count.toLocaleString()}
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Average stopping time
+                </div>
+                <div class="stat-value">
+                    ${averageSteps.toFixed(2)}
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Longest trajectory
+                </div>
+                <div class="stat-value">
+                    ${longest.steps.toLocaleString()}
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Record holder
+                </div>
+                <div class="stat-value">
+                    ${formatBigInt(longest.number)}
+                </div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-label">
+                    Average excursion ratio
+                </div>
+                <div class="stat-value">
+                    ${averageRatio.toFixed(2)}×
+                </div>
+            </div>
+
+        </div>
+
+        <h3>Residue classes modulo 4</h3>
+
+        <div>
+            ${residueHTML}
+        </div>
+
+        <h3>Lower half vs upper half</h3>
+
+        <p>
+            Lower-half average stopping time:
+            <strong>${lowAverage.toFixed(2)}</strong>
+        </p>
+
+        <p>
+            Upper-half average stopping time:
+            <strong>${highAverage.toFixed(2)}</strong>
+        </p>
+
+        <h3>Interpretation</h3>
+
+        <p>
+            These statistics can reveal correlations, but correlation
+            is not proof. A useful pattern becomes mathematically
+            interesting when we can formulate it as a statement that
+            holds for every integer in a precisely defined class.
+        </p>
+    `;
+
+    generateLemmas();
+}
+
+
+/* ============================================================
+   STAGE 7 — CANDIDATE LEMMAS
+   ============================================================ */
+
+function generateLemmas() {
+
+    if (!rangeResults.length) return;
+
+    const max =
+        rangeResults.length;
+
+    const longest =
+        rangeResults.reduce(
+            (a,b) =>
+                b.steps > a.steps ? b : a
+        );
+
+    const allReachOne =
+        rangeResults.every(
+            x => x.reachedOne
+        );
+
+    const lemmas = [];
+
+    /*
+     * Candidate 1
+     */
+
+    if (allReachOne) {
+
+        lemmas.push(`
+            <h3>Candidate A — empirical descent</h3>
+
+            <p>
+            Every tested integer from 1 through
+            <strong>${max.toLocaleString()}</strong>
+            eventually reaches 1.
+            </p>
+
+            <pre>
+Candidate statement:
+
+For every positive integer n in the tested range,
+there exists k ≥ 0 such that C^k(n) = 1.
+
+Research question:
+
+Can this be strengthened from a finite range
+to an infinite class of integers?
+            </pre>
+        `);
+    }
+
+    /*
+     * Candidate 2
+     */
+
+    lemmas.push(`
+        <h3>Candidate B — accelerated odd map</h3>
+
+        <p>
+        Instead of analyzing every division by 2, compress
+        the trajectory between odd numbers.
+        </p>
+
+        <pre>
+For odd n:
+
+n → 3n + 1
+  → (3n + 1)/2
+  → ...
+  → odd number m
+        </pre>
+
+        <p>
+        A potentially powerful question is:
+        <strong>
+        does the accelerated map produce m &lt; n often enough
+        to admit a proof for every odd n?
+        </strong>
+        </p>
+    `);
+
+    /*
+     * Candidate 3
+     */
+
+    lemmas.push(`
+        <h3>Candidate C — logarithmic drift</h3>
+
+        <p>
+        The average multiplicative behavior of a trajectory
+        can be studied through logarithms.
+        </p>
+
+        <pre>
+log(C(n)) - log(n)
+
+If the long-term average drift
+were provably negative for every trajectory,
+that could suggest eventual descent.
+        </pre>
+
+        <p>
+        The challenge is turning an average/statistical
+        observation into a deterministic theorem.
+        </p>
+    `);
+
+    /*
+     * Candidate 4
+     */
+
+    lemmas.push(`
+        <h3>Candidate D — residue classes</h3>
+
+        <p>
+        Compare behavior according to
+        n mod 2^k.
+        </p>
+
+        <pre>
+Instead of asking:
+
+"What happens to n?"
+
+ask:
+
+"What happens to every integer
+in each residue class modulo 2^k?"
+        </pre>
+
+        <p>
+        This is potentially much more useful mathematically,
+        because the first several Collatz operations are strongly
+        determined by the binary structure of n.
+        </p>
+    `);
+
+    document.getElementById("lemmaResults")
+        .innerHTML =
+        lemmas.join("");
+}
+
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+
+function saveNotes() {
+
+    localStorage.setItem(
+        "collatzResearchNotes",
+        document.getElementById("researchNotes").value
+    );
+
+    alert("Research notes saved.");
+}
+
+
+function clearNotes() {
+
+    if (
+        confirm("Clear all research notes?")
+    ) {
+
+        document.getElementById("researchNotes")
+            .value = "";
+
+        localStorage.removeItem(
+            "collatzResearchNotes"
+        );
+    }
+}
+
+
+/* ============================================================
+   LOAD NOTES
+   ============================================================ */
+
+window.addEventListener("load", () => {
+
+    const notes =
+        localStorage.getItem(
+            "collatzResearchNotes"
+        );
+
+    if (notes) {
+
+        document.getElementById("researchNotes")
+            .value = notes;
+    }
+
+    analyzeSingle();
+    analyzePattern();
+});
+
+</script>
+
+</body>
+</html>
